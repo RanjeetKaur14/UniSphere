@@ -576,7 +576,27 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
+<!-- ADD THIS: Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script>
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBaSOsbcryXaFB3kZgWQGUI3OEyDVQrvtc",
+        authDomain: "pulsepointplus.firebaseapp.com",
+        //databaseURL: "https://pulsepointplus-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "pulsepointplus",
+        storageBucket: "pulsepointplus.firebasestorage.app",
+        messagingSenderId: "1066631673823",
+        appId: "1:1066631673823:web:b00f0388a9a48f6c2e366a",
+        measurementId: "G-3LNPXKPS4B"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+</script>
     <!-- CamousBuzz JavaScript -->
     <script>
         // ALL YOUR EXISTING JAVASCRIPT CODE REMAINS EXACTLY THE SAME
@@ -668,11 +688,12 @@
         };
 
         // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            renderPosts();
-            setupEventListeners();
-            updateStats();
-        });
+        // Initialize the app
+document.addEventListener('DOMContentLoaded', function() {
+    loadPostsFromFirebase(); // CHANGED: Load from Firebase
+    setupEventListeners();
+    updateStats();
+});
 
         // Set up event listeners
         function setupEventListeners() {
@@ -740,44 +761,54 @@
         }
 
         // Create new post
-        function createNewPost() {
-            const title = document.getElementById('postTitle').value.trim();
-            const content = document.getElementById('postContent').value.trim();
-            
-            if (!title || !content) {
-                showToast('Please fill in both title and content', 'warning');
-                return;
-            }
-            
-            const newPost = {
-                id: posts.length + 1,
-                user: "Student User",
-                avatar: "https://ui-avatars.com/api/?name=Student+User&background=A8D8EA&color=5D5D5D",
-                department: "Your Department",
-                time: "Just now",
-                title: title,
-                content: content,
-                category: selectedCategory,
-                tags: [selectedCategory],
-                likes: 0,
-                comments: 0,
-                saved: false,
-                liked: false,
-                trending: false,
-                commentsList: []
-            };
-            
-            posts.unshift(newPost);
-            renderPosts();
-            togglePostForm();
-            
-            // Clear form
-            document.getElementById('postTitle').value = '';
-            document.getElementById('postContent').value = '';
-            
-            showToast('Post published successfully!', 'success');
-            updateStats();
-        }
+        // Create new post - SAVE TO FIREBASE
+async function createNewPost() {
+    const title = document.getElementById('postTitle').value.trim();
+    const content = document.getElementById('postContent').value.trim();
+    
+    if (!title || !content) {
+        showToast('Please fill in both title and content', 'warning');
+        return;
+    }
+    
+    try {
+        const newPost = {
+            user: "Student User",
+            avatar: "https://ui-avatars.com/api/?name=Student+User&background=A8D8EA&color=5D5D5D",
+            department: "Your Department",
+            time: "Just now",
+            title: title,
+            content: content,
+            category: selectedCategory,
+            tags: [selectedCategory],
+            likes: 0,
+            comments: 0,
+            saved: false,
+            liked: false,
+            trending: false,
+            commentsList: [],
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        // Save to Firebase
+        const docRef = await db.collection('campusBuzz_posts').add(newPost);
+        newPost.id = docRef.id;
+        
+        posts.unshift(newPost);
+        renderPosts();
+        togglePostForm();
+        
+        // Clear form
+        document.getElementById('postTitle').value = '';
+        document.getElementById('postContent').value = '';
+        
+        showToast('Post published successfully!', 'success');
+        updateStats();
+    } catch (error) {
+        console.error("Error creating post:", error);
+        showToast('Error publishing post', 'error');
+    }
+}
 
         // Handle search with debouncing
         function handleSearch() {
@@ -1135,6 +1166,47 @@
             statsElements.activeUsers.textContent = '32';
             statsElements.urgentPosts.textContent = posts.filter(p => p.tags.includes('urgent')).length + 11;
         }
+        // NEW: Load posts from Firebase
+async function loadPostsFromFirebase() {
+    try {
+        const snapshot = await db.collection('campusBuzz_posts')
+            .orderBy('timestamp', 'desc')
+            .get();
+        
+        posts = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            // Convert Firestore timestamp to readable time
+            if (data.timestamp && data.timestamp.toDate) {
+                data.time = formatTimeAgo(data.timestamp.toDate());
+            }
+            posts.push({ id: doc.id, ...data });
+        });
+        
+        // If no posts in DB, use sample posts
+        if (posts.length === 0) {
+            posts = [...samplePosts];
+        }
+        
+        renderPosts();
+    } catch (error) {
+        console.error("Error loading posts:", error);
+        // Fallback to sample posts
+        posts = [...samplePosts];
+        renderPosts();
+    }
+}
+
+// NEW: Helper function for time formatting
+function formatTimeAgo(date) {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} mins ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
+}
     </script>
 </body>
 </html>
