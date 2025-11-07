@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cart - UniSphere Campus Bazaar</title>
+
+<style>
+/* 🌌 Galaxy Background with Blur */
+body {
+  font-family: "Poppins", sans-serif;
+  background: url('images/universe2.jpg') no-repeat center center fixed;
+  background-size: cover;
+  backdrop-filter: blur(4px);
+  margin: 0;
+  padding: 0;
+  color: #e8e8e8;
+  position: relative;
+}
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 30, 0.5);
+  z-index: 0;
+}
+
+/* Header */
+header {
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+  text-align: center;
+  padding: 25px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+/* Navbar */
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  padding: 12px;
+  position: relative;
+  z-index: 2;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+nav a {
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  background: rgba(255,255,255,0.1);
+  padding: 10px 20px;
+  border-radius: 25px;
+  transition: 0.3s;
+}
+nav a:hover {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  color: #000;
+  transform: scale(1.05);
+}
+
+/* Container */
+.container {
+  width: 85%;
+  margin: 60px auto;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  position: relative;
+  z-index: 2;
+  backdrop-filter: blur(10px);
+}
+
+/* Title */
+h2 {
+  text-align: center;
+  color: #9be7ff;
+  letter-spacing: 1px;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  color: white;
+}
+th, td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+th {
+  background: rgba(255,255,255,0.15);
+  color: #9be7ff;
+}
+
+/* Buttons */
+button {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  border: none;
+  padding: 8px 15px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #000;
+  transition: 0.3s;
+}
+button:hover {
+  background: linear-gradient(135deg, #38f9d7, #43e97b);
+  transform: scale(1.05);
+}
+
+/* Total */
+.total {
+  text-align: right;
+  margin-top: 25px;
+  font-weight: 600;
+  color: #a7ffeb;
+  font-size: 1.2em;
+}
+
+/* Message */
+.message {
+  text-align: center;
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  color: black;
+  padding: 10px;
+  margin: 25px auto;
+  width: fit-content;
+  border-radius: 20px;
+  display: none;
+}
+
+/* Confirm Section */
+.confirm-box {
+  text-align: center;
+  margin-top: 20px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 15px;
+  padding: 15px;
+  display: none;
+  color: #b3e5fc;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.confirm-box p {
+  margin-bottom: 10px;
+}
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  color: #d0d0d0;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+</style>
+</head>
+
+<body>
+<header>UniSphere Campus Bazaar</header>
+
+<nav>
+  <a href="unitrade.html">Home</a>
+  <a href="sell.html">Sell Item</a>
+  <a href="catalog.html">Catalog</a>
+  <a href="cart.html">Cart</a>
+</nav>
+
+<div class="container">
+  <h2>Your Cart</h2>
+  <div id="cartTable"></div>
+  <div class="total" id="total"></div>
+  <div style="text-align:center; margin-top:20px;">
+    <button onclick="showConfirm()">Proceed to Checkout</button>
+  </div>
+
+  <div class="confirm-box" id="confirmBox">
+    <p>Confirm checkout? Items will be deducted from stock.</p>
+    <button onclick="confirmCheckout()">Confirm</button>
+    <button onclick="cancelCheckout()">Cancel</button>
+  </div>
+
+  <div class="message" id="msg"></div>
+</div>
+
+<footer>© 2025 UniSphere — Built for Students</footer>
+
+<script>
+function loadCart() {
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const stock = JSON.parse(localStorage.getItem("stock")) || {};
+  let html = "";
+  let total = 0;
+
+  if (cart.length === 0) {
+    document.getElementById("cartTable").innerHTML = "<p style='text-align:center;color:#b3e5fc;'>Your cart is empty.</p>";
+    document.getElementById("total").innerText = "";
+    return;
+  }
+
+  html += "<table><tr><th>Item</th><th>Price</th><th>Quantity</th><th>Total</th><th>Action</th></tr>";
+  cart.forEach((item, i) => {
+    const available = stock[item.id] ?? item.stock;
+    const validQty = Math.min(item.qty, available);
+    const subtotal = item.price * validQty;
+    total += subtotal;
+
+    html += `<tr>
+      <td>${item.title}</td>
+      <td>₹${item.price}</td>
+      <td>${validQty}</td>
+      <td>₹${subtotal}</td>
+      <td><button onclick="removeItem(${i})">Remove</button></td>
+    </tr>`;
+  });
+  html += "</table>";
+
+  document.getElementById("cartTable").innerHTML = html;
+  document.getElementById("total").innerText = "Total: ₹" + total;
+}
+
+function removeItem(index) {
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  cart.splice(index, 1);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  loadCart();
+}
+
+function showMessage(msgText) {
+  const msg = document.getElementById("msg");
+  msg.innerText = msgText;
+  msg.style.display = "block";
+  setTimeout(() => { msg.style.display = "none"; }, 2500);
+}
+
+function showConfirm() {
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  if (cart.length === 0) {
+    showMessage("Your cart is empty.");
+    return;
+  }
+  document.getElementById("confirmBox").style.display = "block";
+}
+
+function cancelCheckout() {
+  document.getElementById("confirmBox").style.display = "none";
+  showMessage("Checkout cancelled.");
+}
+
+function confirmCheckout() {
+  document.getElementById("confirmBox").style.display = "none";
+  checkout();
+}
+
+function checkout() {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let stock = JSON.parse(localStorage.getItem("stock")) || {};
+
+  if (cart.length === 0) {
+    showMessage("Your cart is empty.");
+    return;
+  }
+
+  let allValid = true;
+  cart.forEach(item => {
+    const available = stock[item.id] ?? item.stock;
+    if (item.qty > available) {
+      allValid = false;
+    }
+  });
+
+  if (!allValid) {
+    showMessage("Some items exceed available stock. Adjust before checkout.");
+    return;
+  }
+
+  cart.forEach(item => {
+    const current = stock[item.id] ?? item.stock;
+    stock[item.id] = current - item.qty;
+    if (stock[item.id] < 0) stock[item.id] = 0;
+  });
+
+  localStorage.setItem("stock", JSON.stringify(stock));
+  localStorage.setItem("cart", JSON.stringify([]));
+
+  showMessage("Checkout successful. Stock updated.");
+  setTimeout(() => loadCart(), 1200);
+}
+
+loadCart();
+</script>
+</body>
+</html>

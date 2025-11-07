@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sell Item - UniTrade</title>
+
+<style>
+/* 🌌 Background and theme */
+body {
+  font-family: "Poppins", sans-serif;
+  background: url('images/universe1.jpg') no-repeat center center/cover;
+  backdrop-filter: blur(4px);
+  margin: 0;
+  color: #222;
+  position: relative;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Subtle overlay for text visibility */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 0;
+}
+
+/* Header */
+header {
+  background: linear-gradient(135deg, #89f7fe, #66a6ff);
+  text-align: center;
+  padding: 25px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  position: relative;
+  z-index: 2;
+}
+
+/* Navbar */
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(10px);
+  padding: 10px;
+  border-bottom: 2px solid rgba(255,255,255,0.2);
+  position: relative;
+  z-index: 2;
+}
+nav a {
+  background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+  border-radius: 30px;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: #003366;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+nav a:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  transform: scale(1.08);
+}
+
+/* Main container */
+.container {
+  width: 80%;
+  margin: 50px auto;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 35px;
+  border-radius: 25px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  position: relative;
+  z-index: 2;
+}
+
+/* Heading */
+.container h2 {
+  text-align: center;
+  color: #004e92;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #89f7fe, #66a6ff, #6a11cb, #2575fc);
+  background-size: 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: moveGradient 6s infinite linear;
+}
+@keyframes moveGradient {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Input fields */
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid rgba(100, 100, 255, 0.3);
+  font-size: 16px;
+  outline: none;
+  background: rgba(255,255,255,0.7);
+  transition: 0.3s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 10px rgba(102,126,234,0.4);
+}
+
+/* Button */
+button {
+  display: block;
+  margin: 25px auto;
+  padding: 14px 35px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+button:hover {
+  transform: scale(1.08);
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  box-shadow: 0 6px 18px rgba(255,255,255,0.4);
+}
+
+/* Message box */
+.message {
+  text-align: center;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 12px;
+  border-radius: 25px;
+  margin-top: 20px;
+  display: none;
+  font-weight: 500;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 15px;
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(6px);
+  margin-top: 40px;
+  font-size: 14px;
+  color: #003366;
+  border-top: 2px solid rgba(255,255,255,0.2);
+}
+</style>
+</head>
+
+<body>
+
+<header>UniTrade Campus Bazaar</header>
+
+<nav>
+  <a href="unitrade.html">Home</a>
+  <a href="sell.html">Sell Item</a>
+  <a href="catalog.html">Catalog</a>
+  <a href="cart.html">Cart</a>
+</nav>
+
+<div class="container">
+  <h2>Add Your Item for Sale</h2>
+
+  <form id="sellForm">
+    <label>Item Title:</label>
+    <input type="text" id="title" placeholder="Enter item name" required>
+
+    <label>Category:</label>
+    <select id="category">
+      <option>Books</option>
+      <option>Electronics</option>
+      <option>Accessories</option>
+      <option>Stationery</option>
+      <option>Fitness</option>
+      <option>Transport</option>
+      <option>Hostel</option>
+      <option>Other</option>
+    </select>
+
+    <label>Description:</label>
+    <textarea id="desc" placeholder="Describe your item" rows="3"></textarea>
+
+    <label>Price (₹):</label>
+    <input type="number" id="price" required>
+
+    <label>Stock Quantity:</label>
+    <input type="number" id="stock" min="1" required>
+
+    <!-- ✅ Newly Added -->
+    <label>Phone Number:</label>
+    <input type="text" id="phone" placeholder="Enter your phone number" required>
+
+    <label>Email:</label>
+    <input type="email" id="email" placeholder="Enter your email address" required>
+
+    <button type="submit">✅ Add Item</button>
+  </form>
+
+  <div id="msg" class="message">✅ Item added successfully!</div>
+</div>
+
+<footer>© 2025 UniTrade — Built with 💙 for Students</footer>
+
+<script>
+document.getElementById("sellForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const title = document.getElementById("title").value;
+  const category = document.getElementById("category").value;
+  const desc = document.getElementById("desc").value;
+  const price = parseFloat(document.getElementById("price").value);
+  const stock = parseInt(document.getElementById("stock").value);
+  const phone = document.getElementById("phone").value;
+  const email = document.getElementById("email").value;
+
+  if (!title || !price || !stock || !phone || !email) return;
+
+  const newItem = {
+    id: Date.now(),
+    title, category, desc, price, stock, phone, email
+  };
+
+  const customItems = JSON.parse(localStorage.getItem("customItems")) || [];
+  customItems.push(newItem);
+  localStorage.setItem("customItems", JSON.stringify(customItems));
+
+  document.getElementById("sellForm").reset();
+  const msg = document.getElementById("msg");
+  msg.style.display = "block";
+  msg.textContent = "✅ Item added successfully!";
+  setTimeout(() => { msg.style.display = "none"; }, 2000);
+});
+</script>
+</body>
+</html>
