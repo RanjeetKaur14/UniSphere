@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galaxy Notes</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Poppins",sans-serif;
+  background:url('images/blue-galaxy.jpg') no-repeat center center/cover;
+  min-height:100vh;
+  overflow-x:hidden;
+  color:#dfe9ff;
+}
+body::before{
+  content:"";
+  position:fixed;
+  top:0;left:0;width:100%;height:100%;
+  background:rgba(0,20,60,0.7);
+  backdrop-filter:blur(6px);
+  z-index:-1;
+}
+
+/* MAIN CONTAINER SPLIT */
+.main{
+  display:flex;
+  justify-content:space-between;
+  align-items:stretch;
+  width:100%;
+  height:100vh;
+  padding:30px;
+  gap:20px;
+}
+
+/* LEFT - ADD NOTES */
+.left{
+  flex:1;
+  background:rgba(0,40,100,0.4);
+  border-radius:20px;
+  padding:30px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 8px 30px rgba(0,0,0,0.4);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.left h2{
+  text-align:center;
+  color:#90c2ff;
+  font-size:1.8rem;
+  margin-bottom:15px;
+  letter-spacing:1px;
+}
+form input,form textarea{
+  width:100%;
+  margin:10px 0;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:rgba(255,255,255,0.1);
+  color:#fff;
+  font-size:1rem;
+  outline:none;
+}
+form input::placeholder,form textarea::placeholder{color:rgba(255,255,255,0.6);}
+form button{
+  margin-top:10px;
+  width:100%;
+  background:linear-gradient(135deg,#3b8dff,#1e5aff);
+  border:none;
+  border-radius:30px;
+  padding:12px;
+  color:white;
+  font-size:1rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.3s;
+}
+form button:hover{
+  background:linear-gradient(135deg,#2bb0ff,#5cc0ff);
+  transform:scale(1.03);
+}
+.status{text-align:center;margin-top:10px;color:#aee4ff;}
+
+/* RIGHT - NOTES LIST */
+.right{
+  flex:1.2;
+  background:rgba(0,30,80,0.5);
+  border-radius:20px;
+  padding:25px;
+  overflow-y:auto;
+  backdrop-filter:blur(10px);
+  box-shadow:0 8px 30px rgba(0,0,0,0.4);
+}
+.right h2{
+  text-align:center;
+  color:#90c2ff;
+  margin-bottom:15px;
+}
+.note-card{
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:15px;
+  padding:15px;
+  margin-bottom:12px;
+  transition:0.3s;
+}
+.note-card:hover{transform:translateY(-3px);}
+.note-card h3{
+  color:#a8d4ff;
+  margin-bottom:6px;
+}
+.note-card p{
+  color:#e3eeff;
+  font-size:0.95rem;
+}
+small{color:#a5c8ff;display:block;margin-top:4px;}
+.delete{
+  color:#ff9a9a;
+  cursor:pointer;
+  float:right;
+  font-size:0.9rem;
+}
+.view{
+  float:right;
+  color:#9af9ff;
+  cursor:pointer;
+  margin-right:10px;
+}
+footer{
+  position:fixed;
+  bottom:10px;
+  width:100%;
+  text-align:center;
+  color:#9bcfff;
+  font-size:0.9rem;
+}
+@media(max-width:900px){
+  .main{flex-direction:column;height:auto;padding:20px;}
+  .left,.right{flex:none;width:100%;margin-bottom:20px;}
+}
+</style>
+</head>
+
+<body>
+  <div class="main">
+    <!-- LEFT SIDE (ADD NOTES) -->
+    <div class="left">
+      <h2>Add Note</h2>
+      <form id="noteForm">
+        <input type="text" id="title" placeholder="Enter title..." required>
+        <textarea id="content" rows="4" placeholder="Write your note here..."></textarea>
+        <button type="submit">Save Note</button>
+      </form>
+      <div id="status" class="status"></div>
+    </div>
+
+    <!-- RIGHT SIDE (SEE NOTES) -->
+    <div class="right">
+      <h2>Your Notes</h2>
+      <div id="notesList"></div>
+    </div>
+  </div>
+
+  <footer>Galaxy Notes — Stored Locally | Created by Akshat</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded",()=>{
+  const form=document.getElementById("noteForm");
+  const notesList=document.getElementById("notesList");
+  const statusEl=document.getElementById("status");
+
+  // Load existing notes
+  let notes=JSON.parse(localStorage.getItem("galaxyNotes"))||[];
+  renderNotes();
+
+  // Add new note
+  form.addEventListener("submit",e=>{
+    e.preventDefault();
+    const title=document.getElementById("title").value.trim();
+    const content=document.getElementById("content").value.trim();
+
+    if(!title&&!content){showStatus("Please enter a note!");return;}
+    const newNote={id:Date.now(),title,content,time:new Date().toLocaleString()};
+    notes.unshift(newNote);
+    localStorage.setItem("galaxyNotes",JSON.stringify(notes));
+    form.reset();
+    renderNotes();
+    showStatus("Note saved successfully!");
+  });
+
+  // Show status
+  function showStatus(msg){
+    statusEl.textContent=msg;
+    setTimeout(()=>statusEl.textContent="",2000);
+  }
+
+  // Render all notes
+  function renderNotes(){
+    notesList.innerHTML="";
+    if(notes.length===0){
+      notesList.innerHTML="<p style='text-align:center;opacity:0.8;'>No notes yet</p>";
+      return;
+    }
+    notes.forEach(n=>{
+      const div=document.createElement("div");
+      div.className="note-card";
+      div.innerHTML=`
+        <h3>${n.title}<span class="delete" data-id="${n.id}">Delete</span><span class="view" data-id="${n.id}">View</span></h3>
+        <p>${truncate(n.content,100)}</p>
+        <small>${n.time}</small>
+      `;
+      notesList.appendChild(div);
+    });
+
+    // View full note
+    document.querySelectorAll(".view").forEach(btn=>{
+      btn.onclick=()=>{
+        const id=btn.dataset.id;
+        const note=notes.find(x=>x.id==id);
+        alert(`${note.title}\n\n${note.content}`);
+      }
+    });
+
+    // Delete note
+    document.querySelectorAll(".delete").forEach(btn=>{
+      btn.onclick=()=>{
+        const id=btn.dataset.id;
+        notes=notes.filter(x=>x.id!=id);
+        localStorage.setItem("galaxyNotes",JSON.stringify(notes));
+        renderNotes();
+        showStatus("Note deleted!");
+      }
+    });
+  }
+
+  // Helper
+  function truncate(str,len){
+    return str.length>len?str.substring(0,len)+"...":str;
+  }
+});
+</script>
+</body>
+</html>
