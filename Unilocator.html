@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Campus Navigator — Midnight Bloom</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg1:#0e0b1d;
+    --bg2:#1a1035;
+    --accent1:#d98df0;
+    --accent2:#ff9ecb;
+    --text:#f4f2ff;
+    --card:#1e163c;
+    --muted:#b8aee6;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;transition:all .25s ease;}
+  body{
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2));
+    color:var(--text);
+    display:flex;align-items:center;justify-content:center;
+    min-height:100vh;
+  }
+  .container{
+    display:flex;
+    width:88%;
+    max-width:1100px;
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:0 0 40px rgba(255,255,255,0.05);
+    background:rgba(255,255,255,0.03);
+  }
+  .left{
+    flex:1;
+    background:linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:40px;
+  }
+  .left img {
+  width: 95%;                
+  max-height: 420px;        
+  border-radius: 24px;       
+  object-fit: cover;         
+  filter: brightness(0.8) saturate(1.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  opacity: 1;
+  transition: opacity 0.6s ease, transform 0.5s ease;
+}
+
+.left img:hover {
+  transform: scale(1.03);    /* subtle zoom-in effect on hover */
+}
+
+  .left img.fade{ opacity:0; }
+  .left h2{ margin-top:20px; font-size:22px; color:var(--muted); text-align:center; }
+  .right{
+    flex:1;
+    background:rgba(255,255,255,0.04);
+    padding:40px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  h1{font-size:28px;margin:0 0 8px;background:linear-gradient(90deg,var(--accent1),var(--accent2));-webkit-background-clip:text;color:transparent;}
+  p.sub{color:var(--muted);font-size:15px;margin-bottom:28px;}
+  label{font-weight:500;color:var(--muted);}
+  select{
+    width:100%;padding:12px 14px;margin:6px 0 18px;
+    border:none;border-radius:12px;
+    background:var(--card);color:var(--text);font-size:15px;
+    box-shadow:inset 0 0 6px rgba(255,255,255,0.08);
+  }
+  button{
+    border:none;
+    background:linear-gradient(90deg,var(--accent1),var(--accent2));
+    color:#20142f;font-weight:600;font-size:15px;
+    padding:12px 20px;border-radius:12px;cursor:pointer;
+    box-shadow:0 4px 18px rgba(255,160,220,0.3);
+  }
+  button:hover{transform:scale(1.05);}
+  .result{
+    background:var(--card);
+    border-radius:16px;
+    padding:18px;
+    margin-top:24px;
+    box-shadow:0 3px 20px rgba(0,0,0,0.3);
+    display:none;
+  }
+  .result.active{display:block;}
+  .result h3{margin:0 0 6px;color:var(--text);}
+  .result p{margin:3px 0;color:var(--muted);font-size:14px;}
+  footer{text-align:center;margin-top:28px;font-size:13px;color:var(--muted);}
+  footer span{background:linear-gradient(90deg,var(--accent1),var(--accent2));-webkit-background-clip:text;color:transparent;font-weight:600;}
+  @media(max-width:850px){.container{flex-direction:column;width:95%;}.left,.right{padding:25px;}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="left">
+    <!-- ✅ Added this missing image tag -->
+    
+    <h2 id="buildingName">Welcome to Campus Navigator</h2>
+  </div>
+
+  <div class="right">
+    <h1>Campus Navigator</h1>
+    <p class="sub">Find your labs, tutorials & lecture halls across campus</p>
+
+    <label for="category">Select Type</label>
+    <select id="category">
+      <option value="">-- Choose --</option>
+      <option value="lab">Lab</option>
+      <option value="tutorial">Tutorial Room</option>
+      <option value="lecture">Lecture Hall</option>
+    </select>
+
+    <label for="option">Select Room / Lab</label>
+    <select id="option" disabled>
+      <option value="">-- Select category first --</option>
+    </select>
+
+    <button id="findBtn" disabled>Find Location</button>
+
+    <div class="result" id="result">
+      <h3 id="resultName"></h3>
+      <p id="resultPlace"></p>
+      <p id="resultFloor"></p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const ABB_IMAGES = {
+  "ABB-I": "/images/abb1.jpg",
+  "ABB-II": "/images/abb2.jpg",
+  "ABB-III": "/images/abb3.jpg",
+  "DEFAULT": "/images/default_building.jpg"
+};
+
+// simplified version of the JS logic — full data same as before
+/* ---------- Labs ---------- */
+const labs = {
+  "CL1": { name: "Computer Lab-1", place: "ABB-III", floor: "Underground" },
+  "MML": { name: "Multimedia Lab", place: "ABB-II", floor: "II Floor" },
+  "VDA": { name: "VLSI Design Automation Lab", place: "ABB-II", floor: "V Floor" },
+  "BIOINFO": { name: "Bioinformatics Lab", place: "ABB-I", floor: "Ground Floor" },
+  "IOT": { name: "Internet of Things Lab", place: "ABB-III", floor: "Underground" },
+  "CPMCS": { name: "Centre for Performance Modeling of Computing System", place: "ABB-II", floor: "Underground" },
+  "PL1": { name: "Physics Lab-1", place: "ABB-I", floor: "II Floor" },
+  "PL2": { name: "Physics Lab-2", place: "ABB-II", floor: "II Floor" },
+  "JBSP": { name: "JBS Project Lab", place: "ABB-II", floor: "Ground Floor" },
+  "BEL1": { name: "Basic Electronics Lab-1", place: "ABB-II", floor: "III Floor" },
+  "BEL2": { name: "Basic Electronics Lab-2", place: "ABB-II", floor: "III Floor" },
+  "EDC": { name: "Electronics Device and Circuit Lab", place: "ABB-II", floor: "I Floor" },
+  "DL": { name: "Digital Lab", place: "ABB-II", floor: "-" },
+  "PML": { name: "Power/PLC Lab", place: "ABB-I", floor: "-" },
+  "EML": { name: "Electrical Machines Lab", place: "ABB-I", floor: "I Floor" },
+  "CML": { name: "Communication System Lab", place: "ABB-I", floor: "II Floor" },
+  "INS": { name: "Information Security Lab", place: "ABB-III", floor: "Underground" },
+  "BCL": { name: "Biochemistry Lab", place: "ABB-I", floor: "I Floor" },
+  "BT1": { name: "Biotech Lab-I", place: "ABB-I", floor: "I Floor" },
+  "PTC1": { name: "Plant Tissue Culture Lab", place: "ABB-I", floor: "I Floor" },
+  "BT2": { name: "Biotech Lab-II", place: "ABB-I", floor: "I Floor" },
+  "BT3": { name: "Biotech Lab-III", place: "ABB-I", floor: "I Floor" },
+  "MSEL": { name: "Material Science and Engineering Lab", place: "ABB-I", floor: "Ground Floor" },
+  "ACL": { name: "Advanced Communication Lab", place: "ABB-I", floor: "II Floor" },
+  "ESL": { name: "English as Second Language Lab", place: "ABB-I", floor: "Ground Floor" },
+  "BT4": { name: "Biotech Lab-IV", place: "ABB-II", floor: "I Floor" },
+  "EW": { name: "Engineering Workshop", place: "Below OAT", floor: "Workshop and Parking" },
+  "EDD": { name: "Engineering Drawing and Design (CAD Lab)", place: "ABB-III", floor: "V/1 Floor" },
+  "CL304": { name: "Computer Application Lab-1 (CL304)", place: "ABB-III", floor: "3rd Floor" },
+  "CL306": { name: "Computer Application Lab-2 (CL306)", place: "ABB-III", floor: "3rd Floor" },
+  "CL317": { name: "Computer Application Lab-3 (CL317)", place: "ABB-III", floor: "3rd Floor" },
+  "CL324": { name: "Computer Application Lab-4 (CL324)", place: "ABB-III", floor: "3rd Floor" },
+  "MCL-421": { name: "Computing Lab", place: "ABB-III", floor: "4th Floor" },
+  "MATHS LAB": { name: "Mathematics Lab", place: "ABB-I", floor: "2nd Floor" },
+  "ADE": { name: "Analog and Digital Electronics Lab", place: "ABB-II", floor: "III Floor" },
+  "MLL": { name: "Machine Learning Lab", place: "ABB-III", floor: "5th Floor" },
+  "SPL": { name: "Signal Processing Lab", place: "ABB-III", floor: "5th Floor" },
+  "MOD": { name: "Modelling and Simulation Lab", place: "ABB-III", floor: "5th Floor" },
+  "FAB": { name: "VISI Fabrication and Characterization Lab", place: "ABB-III", floor: "4th Floor" },
+  "CI-VLSI": { name: "Centre for Innovation in VLSI and Smart System", place: "ABB-III", floor: "II Floor" }
+};
+
+/* ---------- Tutorials ---------- */
+const tutorials = {
+  "TS-1": { place: "ABB-I", floor: "Second Floor" },
+  "TS-2": { place: "ABB-I", floor: "Second Floor" },
+  "TS-5": { place: "ABB-I", floor: "Second Floor" },
+  "TS-6": { place: "ABB-I", floor: "Second Floor" },
+  "TS-7": { place: "ABB-I", floor: "Second Floor" },
+  "TS-8": { place: "ABB-I", floor: "Second Floor" },
+  "TS-9": { place: "ABB-I", floor: "Second Floor" },
+  "TS-10": { place: "ABB-I", floor: "Second Floor" },
+  "TS-11": { place: "ABB-I", floor: "Second Floor" },
+  "TS-12": { place: "ABB-I", floor: "Second Floor" },
+  "TS-13": { place: "ABB-II", floor: "Second Floor" },
+  "TS-14": { place: "ABB-II", floor: "Second Floor" },
+  "TS-15": { place: "ABB-II", floor: "Second Floor" },
+  "TS-16": { place: "ABB-II", floor: "Second Floor" },
+  "TS-17": { place: "ABB-II", floor: "Second Floor" },
+  "TS-18": { place: "ABB-II", floor: "Second Floor" },
+  "TS-19": { place: "ABB-II", floor: "Second Floor" },
+  "TS-20": { place: "ABB-II", floor: "Second Floor" }
+};
+
+/* ---------- Lecture Halls ---------- */
+const lectures = {
+  "Auditorium": { place: "ABB-II", floor: "Ground Floor" },
+  "G-1": { place: "ABB-I", floor: "Ground Floor" },
+  "G-2": { place: "ABB-I", floor: "Ground Floor" },
+  "G-3": { place: "ABB-I", floor: "Ground Floor" },
+  "G-4": { place: "ABB-I", floor: "Ground Floor" },
+  "G-5": { place: "ABB-I", floor: "Ground Floor" },
+  "G-6": { place: "ABB-I", floor: "Ground Floor" },
+  "G-7": { place: "ABB-I", floor: "Ground Floor" },
+  "G-8": { place: "ABB-I", floor: "Ground Floor" },
+  "G-9": { place: "ABB-I", floor: "Ground Floor" },
+  "G-10": { place: "ABB-II", floor: "Ground Floor" },
+  "G-11": { place: "ABB-II", floor: "Ground Floor" },
+  "G-12": { place: "ABB-II", floor: "Ground Floor" },
+  "G-13": { place: "ABB-II", floor: "Ground Floor" },
+  "LT-1": { place: "ABB-I", floor: "Ground Floor" },
+  "LT-2": { place: "ABB-I", floor: "Ground Floor" },
+  "LT-3": { place: "ABB-I", floor: "Ground Floor" },
+  "LT-4": { place: "ABB-II", floor: "Ground Floor" },
+  "LT-5": { place: "ABB-II", floor: "Ground Floor" },
+  "F-1": { place: "ABB-II", floor: "First Floor" },
+  "F-2": { place: "ABB-II", floor: "First Floor" },
+  "F-4": { place: "ABB-II", floor: "First Floor" },
+  "F-5": { place: "ABB-II", floor: "First Floor" },
+  "F-6": { place: "ABB-II", floor: "First Floor" },
+  "F-7": { place: "ABB-II", floor: "First Floor" },
+  "F-8": { place: "ABB-II", floor: "First Floor" },
+  "F-9": { place: "ABB-II", floor: "First Floor" },
+  "F-10": { place: "ABB-II", floor: "First Floor" },
+  "FF-1": { place: "ABB-I", floor: "First Floor" },
+  "FF-2": { place: "ABB-I", floor: "First Floor" },
+  "FF-4": { place: "ABB-I", floor: "First Floor" },
+  "FF-5": { place: "ABB-I", floor: "First Floor" },
+  "FF-6": { place: "ABB-I", floor: "First Floor" },
+  "FF-7": { place: "ABB-I", floor: "First Floor" },
+  "FF-8": { place: "ABB-I", floor: "First Floor" },
+  "FF-9": { place: "ABB-I", floor: "First Floor" },
+  "CS-1": { place: "ABB-I", floor: "Second Floor" },
+  "CS-2": { place: "ABB-I", floor: "Second Floor" },
+  "CS-3": { place: "ABB-I", floor: "Second Floor" },
+  "CS-4": { place: "ABB-I", floor: "Second Floor" },
+  "CS-5": { place: "ABB-II", floor: "Second Floor" },
+  "CS-6": { place: "ABB-II", floor: "Second Floor" },
+  "CS-7": { place: "ABB-II", floor: "Second Floor" },
+  "CS-8": { place: "ABB-II", floor: "Second Floor" },
+  "CS-9": { place: "ABB-I", floor: "Second Floor" },
+  "CS-10": { place: "ABB-I", floor: "Second Floor" },
+  "CS-11": { place: "ABB-I", floor: "Second Floor" },
+  "CS-12": { place: "ABB-I", floor: "Second Floor" },
+  "CS-13": { place: "ABB-II", floor: "Second Floor" },
+  "CS-14": { place: "ABB-II", floor: "Second Floor" },
+  "CR301": { place: "ABB-III", floor: "Third Floor" },
+  "CR325": { place: "ABB-III", floor: "Third Floor" },
+  "CR401": { place: "ABB-III", floor: "Fourth Floor" },
+  "CR425": { place: "ABB-III", floor: "Fourth Floor" },
+  "CR501": { place: "ABB-III", floor: "Fifth Floor" },
+  "CR526": { place: "ABB-III", floor: "Fifth Floor" },
+  "T&P Cell": { place: "ABB-I", floor: "Second Floor" },
+  "Executive Room - I": { place: "ABB-II", floor: "-" },
+  "Executive Room - II": { place: "ABB-II", floor: "-" }
+};
+
+
+// UI
+const cat=document.getElementById("category");
+const opt=document.getElementById("option");
+const btn=document.getElementById("findBtn");
+const result=document.getElementById("result");
+const resultName=document.getElementById("resultName");
+const resultPlace=document.getElementById("resultPlace");
+const resultFloor=document.getElementById("resultFloor");
+const buildingImg=document.getElementById("buildingImg");
+const buildingName=document.getElementById("buildingName");
+
+cat.addEventListener("change",()=>{
+  opt.innerHTML="";opt.disabled=true;btn.disabled=true;result.classList.remove("active");
+  let data;
+  if(cat.value==="lab")data=labs;
+  else if(cat.value==="tutorial")data=tutorials;
+  else if(cat.value==="lecture")data=lectures;
+  if(!data){opt.innerHTML="<option>-- Select category first --</option>";return;}
+  opt.innerHTML="<option value=''>-- Select --</option>";
+  Object.keys(data).forEach(k=>{
+    const text=(cat.value==="lab")?`${k} — ${data[k].name}`:k;
+    opt.innerHTML+=`<option value='${k}'>${text}</option>`;
+  });
+  opt.disabled=false;
+});
+opt.addEventListener("change",()=>{btn.disabled=!opt.value;});
+btn.addEventListener("click",()=>{
+  let data;
+  if(cat.value==="lab")data=labs[opt.value];
+  else if(cat.value==="tutorial")data=tutorials[opt.value];
+  else data=lectures[opt.value];
+  if(!data)return;
+  const place=data.place||"—",floor=data.floor||"—";
+  const img=ABB_IMAGES[place]||ABB_IMAGES.DEFAULT;
+
+  // Fade transition
+  buildingImg.classList.add("fade");
+  setTimeout(()=>{
+    buildingImg.src=img;
+    buildingImg.classList.remove("fade");
+  },300);
+
+  buildingName.textContent=place;
+  result.classList.add("active");
+  resultName.textContent=opt.value+(data.name?` — ${data.name}`:"");
+  resultPlace.textContent=`📍 ${place}`;
+  resultFloor.textContent=` ${floor}`;
+});
+</script>
+</body>
+</html>

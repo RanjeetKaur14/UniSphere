@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account | UniSphere</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+  <!-- Firebase v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBaSOsbcryXaFB3kZgWQGUI3OEyDVQrvtc",
+      authDomain: "pulsepointplus.firebaseapp.com",
+      projectId: "pulsepointplus",
+      storageBucket: "pulsepointplus.appspot.com",
+      messagingSenderId: "1066631673823",
+      appId: "1:1066631673823:web:b00f0388a9a48f6c2e366a",
+      measurementId: "G-3LNPXKPS4B"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #d6e4ff, #f8d4ec);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .card {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.85);
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    .eye-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #6b7280;
+    }
+  </style>
+</head>
+
+<body class="flex justify-center items-center h-screen">
+  <div class="card rounded-2xl p-8 w-96">
+    <h2 class="text-2xl font-bold text-center mb-6 text-blue-700">Create JIIT Account</h2>
+
+    <form id="signupForm" class="relative">
+      <label for="name" class="block text-gray-700 font-semibold mb-1">Full Name</label>
+      <input type="text" id="name" placeholder="Enter your name"
+        required class="w-full border border-gray-300 rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+
+      <label for="email" class="block text-gray-700 font-semibold mb-1">JIIT Email</label>
+      <input type="email" id="email" placeholder="example@mail.jiit.ac.in"
+        required class="w-full border border-gray-300 rounded-lg p-2 mb-4 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+
+      <label for="password" class="block text-gray-700 font-semibold mb-1">Password</label>
+      <div class="relative mb-4">
+        <input type="password" id="password" placeholder="Enter password"
+          required class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+        <span id="togglePassword" class="eye-icon">👁️</span>
+      </div>
+
+      <button type="submit"
+        class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
+        Create Account
+      </button>
+
+      <p id="errorMsg" class="text-red-500 text-sm mt-3 hidden text-center">
+        Invalid email format. Use @mail.jiit.ac.in
+      </p>
+
+      <p class="text-sm mt-4 text-center text-gray-700">
+        Already have an account?
+        <a href="login.html" class="text-blue-600 hover:underline">Login</a>
+      </p>
+    </form>
+  </div>
+
+  <script>
+    const auth = firebase.auth();
+    const form = document.getElementById("signupForm");
+    const errorMsg = document.getElementById("errorMsg");
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordField = document.getElementById("password");
+
+    // Show/Hide password
+    togglePassword.addEventListener("click", () => {
+      const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+      passwordField.setAttribute("type", type);
+      togglePassword.textContent = type === "password" ? "👁️" : "🙈";
+    });
+
+    // Signup process
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!email.endsWith("@mail.jiit.ac.in")) {
+        errorMsg.classList.remove("hidden");
+        return;
+      } else {
+        errorMsg.classList.add("hidden");
+      }
+
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+
+        await user.updateProfile({ displayName: name });
+        await user.sendEmailVerification();
+
+        alert("Account created successfully. Check your email for the verification link.");
+        window.location.href = "login.html";
+      } catch (error) {
+        console.error("Signup Error:", error);
+        alert("Signup failed: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

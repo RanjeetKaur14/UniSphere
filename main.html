@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JIIT Dashboard | UniSphere</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+  <!-- Google Font: Poppins or Inter for elegance -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Firebase v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyBaSOsbcryXaFB3kZgWQGUI3OEyDVQrvtc",
+        authDomain: "pulsepointplus.firebaseapp.com",
+        projectId: "pulsepointplus",
+        storageBucket: "pulsepointplus.appspot.com",
+        messagingSenderId: "1066631673823",
+        appId: "1:1066631673823:web:b00f0388a9a48f6c2e366a",
+        measurementId: "G-3LNPXKPS4B"
+      };
+      firebase.initializeApp(firebaseConfig);
+    </script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-image: url('images/background.jpg'); /* your background image */
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: #fff;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(4px);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: #fff;
+      text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 50px;
+    }
+
+    .feature {
+      position: relative;
+      height: 280px;
+      border-radius: 20px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      overflow: hidden;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+    }
+
+    .feature::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      transition: all 0.4s ease;
+    }
+
+    .feature:hover::before {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(18px);
+    }
+
+    .feature:hover {
+      transform: scale(1.03);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .feature-title {
+      position: absolute;
+      bottom: 25px;
+      left: 25px;
+      font-size: 1.6rem;
+      font-weight: 600;
+      z-index: 2;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    .logout-btn {
+      position: absolute;
+      top: 25px;
+      right: 30px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1.5px solid white;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background-color: rgba(255, 255, 255, 0.35);
+    }
+
+    @media (max-width: 768px) {
+      .feature-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+      .feature {
+        height: 220px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="overlay">
+    <button id="logoutBtn" class="logout-btn">Logout</button>
+    <h2>Welcome, <span id="userName"></span></h2>
+
+    <div class="feature-grid">
+      <div class="feature" id="feature1" style="background-image: url('images/filemanager.jpg');">
+        <div class="feature-title">UniSphere Locator</div>
+      </div>
+      <div class="feature" id="feature2" style="background-image: url('images/CampusBuzz.png');">
+        <div class="feature-title">Campus Buzz</div>
+      </div>
+      <div class="feature" id="feature3" style="background-image: url('images/emotion.jpg');">
+        <div class="feature-title">Uni Trade</div>
+      </div>
+      <div class="feature" id="feature4" style="background-image: url('images/shop.jpg');">
+        <div class="feature-title">Smart Desk</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const auth = firebase.auth();
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    auth.onAuthStateChanged((user) => {
+  if (!user) {
+    window.location.href = "login.html";
+  } else {
+    const displayName = user.displayName ? user.displayName : user.email.split("@")[0];
+    const avatarURL = user.photoURL 
+      ? user.photoURL 
+      : `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}`;
+
+    // ✅ Save to localStorage so CampusBuzz can read it
+    localStorage.setItem("username", displayName);
+    localStorage.setItem("avatar", avatarURL);
+
+    document.getElementById("userName").textContent = displayName;
+  }
+});
+
+
+    logoutBtn.addEventListener("click", async () => {
+      await auth.signOut();
+      alert("Logged out successfully.");
+      window.location.href = "login.html";
+    });
+
+    // Redirect actions
+    document.getElementById("feature1").addEventListener("click", () => window.location.href = "unilochoice.html");
+    //document.getElementById("feature2").addEventListener("click", () => window.location.href = "CampusBuzz.html");
+    document.getElementById("feature2").addEventListener("click", () => window.location.href = "CampusBuzz.html");
+    document.getElementById("feature3").addEventListener("click", () => window.location.href = "Unitrade.html");
+    document.getElementById("feature4").addEventListener("click", () => window.location.href = "YourNotes.html");
+  </script>
+</body>
+</html>

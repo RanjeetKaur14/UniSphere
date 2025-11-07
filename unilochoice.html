@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JIIT Info Portal</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+  }
+
+  body {
+    height: 100vh;
+    background: linear-gradient(135deg, #d7e3fc, #f5e1fd);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  h1 {
+    color: #423c6d;
+    font-size: 2.2rem;
+    margin-bottom: 40px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .container {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .card {
+    width: 260px;
+    height: 260px;
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.25s ease-in-out;
+    position: relative;
+  }
+
+  .card:hover {
+    transform: translateY(-8px);
+    background: rgba(255,255,255,0.85);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  .icon {
+    font-size: 60px;
+    margin-bottom: 14px;
+  }
+
+  .title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4f3b78;
+  }
+
+  .sub {
+    font-size: 0.9rem;
+    color: #6d5c93;
+    margin-top: 6px;
+  }
+
+  footer {
+    position: absolute;
+    bottom: 20px;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+
+  /* Floating sparkles for extra cuteness ✨ */
+  .sparkle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, #fff 40%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: float 6s linear infinite;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0) translateX(0); opacity: 0.8; }
+    50% { transform: translateY(-80px) translateX(20px); opacity: 0.4; }
+    100% { transform: translateY(0) translateX(0); opacity: 0.8; }
+  }
+</style>
+</head>
+<body>
+  <h1>Welcome to JIIT Info Portal 💫</h1>
+
+  <div class="container">
+    <div class="card" onclick="goTo('Unilocator.html')">
+      <div class="icon">🏫</div>
+      <div class="title">Campus Locations</div>
+      <div class="sub">Find labs, blocks & buildings</div>
+    </div>
+
+    <div class="card" onclick="goTo('teacher.html')">
+      <div class="icon">👩‍🏫</div>
+      <div class="title">Professor Information</div>
+      <div class="sub">Search teachers & their cabins</div>
+    </div>
+  </div>
+
+  <footer>Made with 💙 by Max & Ranjeet</footer>
+
+  <script>
+    function goTo(page){
+      // Simple redirection
+      window.location.href = page;
+    }
+
+    // create floating sparkles
+    for(let i=0; i<18; i++){
+      const s = document.createElement("div");
+      s.className = "sparkle";
+      s.style.left = Math.random()*100 + "%";
+      s.style.top = Math.random()*100 + "%";
+      s.style.animationDelay = (Math.random()*6)+"s";
+      document.body.appendChild(s);
+    }
+  </script>
+</body>
+</html>
